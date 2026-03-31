@@ -292,12 +292,15 @@ export function startStt(callbacks: SttCallbacks): boolean {
           const wavBlob = await convertToWav(audioBlob);
           console.log("[STT] WAV blob size:", wavBlob.size, "bytes");
 
+          // Play stop sound BEFORE sending to server (when audio file is ready)
+          playStopSound();
+
           const text = await sendToSttServer(wavBlob);
           console.log("[STT] Transcription:", text);
 
           if (text && sttCallbacks && sessionId === currentSessionId) {
             console.log("[STT] Calling onTranscript with:", text);
-            playDoneSound(); // Play completion sound
+            playDoneSound(); // Play completion sound when transcription done
             sttCallbacks.onTranscript(text, true);
           }
         } catch (error) {
@@ -308,19 +311,6 @@ export function startStt(callbacks: SttCallbacks): boolean {
         } finally {
           stream.getTracks().forEach((track) => track.stop());
           audioChunks = [];
-          // Play stop sound when recording actually stops
-          console.log(
-            "[STT] finally block, sessionId:",
-            sessionId,
-            "currentSessionId:",
-            currentSessionId,
-            "sttCallbacks exists:",
-            !!sttCallbacks,
-          );
-          if (sessionId === currentSessionId && sttCallbacks) {
-            console.log("[STT] Calling onEnd callback");
-            sttCallbacks.onEnd?.();
-          }
         }
       };
 
