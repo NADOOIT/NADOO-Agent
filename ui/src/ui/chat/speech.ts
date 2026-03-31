@@ -61,9 +61,9 @@ function playStartSound(): void {
 }
 
 function playStopSound(): void {
-  // Soft descending tone
-  playBeep(523, 0.1, 0.15); // C5
-  setTimeout(() => playBeep(392, 0.12, 0.12), 80); // G4
+  // Clear two-tone descending "bip-bop" sound
+  playBeep(880, 0.08, 0.25); // High A5 - distinct
+  setTimeout(() => playBeep(440, 0.12, 0.25), 120); // A4 - clear drop
 }
 
 // ─── STT (Speech-to-Text) via Cohere Server ───
@@ -309,8 +309,17 @@ export function startStt(callbacks: SttCallbacks): boolean {
           stream.getTracks().forEach((track) => track.stop());
           audioChunks = [];
           // Play stop sound when recording actually stops
-          if (sessionId === currentSessionId) {
-            sttCallbacks?.onEnd?.();
+          console.log(
+            "[STT] finally block, sessionId:",
+            sessionId,
+            "currentSessionId:",
+            currentSessionId,
+            "sttCallbacks exists:",
+            !!sttCallbacks,
+          );
+          if (sessionId === currentSessionId && sttCallbacks) {
+            console.log("[STT] Calling onEnd callback");
+            sttCallbacks.onEnd?.();
           }
         }
       };
