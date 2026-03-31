@@ -20,7 +20,7 @@ function getSttServerUrl(): string {
 
 let beepAudioContext: AudioContext | null = null;
 
-function playBeep(frequency: number = 800, duration: number = 0.1, volume: number = 0.3): void {
+function playBeep(frequency: number = 800, duration: number = 0.15, volume: number = 0.2): void {
   try {
     if (!beepAudioContext) {
       beepAudioContext = new AudioContext();
@@ -33,27 +33,37 @@ function playBeep(frequency: number = 800, duration: number = 0.1, volume: numbe
 
     oscillator.frequency.value = frequency;
     oscillator.type = "sine";
-    gainNode.gain.value = volume;
 
-    oscillator.start();
-    oscillator.stop(beepAudioContext.currentTime + duration);
+    // Soft attack and release for less harsh sound
+    const now = beepAudioContext.currentTime;
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(volume, now + 0.02); // 20ms attack
+    gainNode.gain.setValueAtTime(volume, now + duration - 0.03);
+    gainNode.gain.linearRampToValueAtTime(0, now + duration); // 30ms release
+
+    oscillator.start(now);
+    oscillator.stop(now + duration);
   } catch (e) {
     console.error("[SPEECH] Failed to play beep:", e);
   }
 }
 
 function playDoneSound(): void {
-  // Double beep for completion
-  playBeep(1200, 0.08, 0.3);
-  setTimeout(() => playBeep(1200, 0.08, 0.3), 150);
+  // Pleasant ascending chime for completion
+  playBeep(523, 0.12, 0.15); // C5
+  setTimeout(() => playBeep(659, 0.12, 0.15), 100); // E5
+  setTimeout(() => playBeep(784, 0.15, 0.15), 200); // G5
 }
 
 function playStartSound(): void {
-  playBeep(1000, 0.1, 0.3);
+  // Soft low tone
+  playBeep(440, 0.1, 0.15); // A4
 }
 
 function playStopSound(): void {
-  playBeep(800, 0.1, 0.3);
+  // Soft descending tone
+  playBeep(523, 0.1, 0.15); // C5
+  setTimeout(() => playBeep(392, 0.12, 0.12), 80); // G4
 }
 
 // ─── STT (Speech-to-Text) via Cohere Server ───
