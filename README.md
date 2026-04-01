@@ -1,4 +1,21 @@
-Start with cd /Users/<USERNAME>/Documents/GitHub/NADOO-Agent && pnpm dev
+### NADOOIT Development Setup
+
+Du hast zwei OpenClaw-Instanzen parallel:
+
+**1. Offizielle Version** (system-managed, Port 18789):
+- Läuft via launchd
+- Update über npm/global
+
+**2. NADOOIT Dev-Version** (dein Fork, Port 19001):
+
+```bash
+# Gateway starten (im NADOOIT-Repo)
+cd ~/Documents/GitHub/NADOO-Agent
+node openclaw.mjs gateway --port 19001
+
+# UI Dev-Server in separatem Terminal
+cd ~/Documents/GitHub/NADOO-Agent/ui
+pnpm dev
 
 # 🦞 OpenClaw — Personal AI Assistant
 
